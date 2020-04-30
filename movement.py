@@ -1,3 +1,5 @@
+import math
+import pygame
 from abc import ABC, abstractmethod
 from pygame.locals import *
 
@@ -65,8 +67,47 @@ class PaddleMovement_Manual(PaddleMovement):
 
 class PaddleMovement_AI(PaddleMovement):
     """Controls paddle movement based on heuristics"""
-    def __init__(self, paddle):
+    def __init__(self, paddle, type):
         super().__init__(paddle)
+        self.target_y = None
+
+        if type == "basic":
+            self.set_target_y = self.basic_target_y
+        elif type == "advanced":
+            self.set_target_y = self.advanced_target_y
+
+    def basic_target_y(self, ball):
+        self.target_y = ball.rect.centery
+
+    def advanced_target_y(self, ball):
+        screen_height = pygame.display.get_surface().get_height()
+        screen_width = pygame.display.get_surface().get_width()
+
+        angle = ball.angle
+        if angle < 0:
+            angle = 2 * math.pi + ball.angle
+
+        ball_direction = "left" if angle > 0.5 * math.pi and angle < 1.5 * math.pi else "right"
+        if ball_direction == "left":
+            if self.paddle.side == "left":
+                angle = math.pi - angle
+                dx = ball.rect.centerx - self.paddle.rect.right
+                dy = dx * math.tan(angle)
+                self.target_y = math.pow(-1, abs(ball.rect.centery - dy) // screen_height) * (abs(ball.rect.centery - dy) % screen_height)
+                if self.target_y < 0:
+                    self.target_y = screen_height + self.target_y
+            else:
+                self.target_y = screen_height / 2 
+        else:
+            self.target_y = screen_height / 2 
+            if self.paddle.side == "right":
+                dx = self.paddle.rect.left - ball.rect.centerx
+                dy = dx * math.tan(angle)
+                self.target_y = math.pow(-1, abs(ball.rect.centery - dy) // screen_height) * (abs(ball.rect.centery - dy) % screen_height)
+                if self.target_y < 0:
+                    self.target_y = screen_height + self.target_y
+            else:
+                self.target_y = screen_height / 2 
 
     def update(self, ball):
         """Determines and sets the movement direction of a paddle based on ball location.
@@ -74,11 +115,14 @@ class PaddleMovement_AI(PaddleMovement):
         Args:
             ball (Sprite)
         """
-        if ball.rect.centery > self.paddle.rect.centery:
+        self.set_target_y(ball)
+
+        if self.target_y > self.paddle.rect.centery:
             self.moveup = False
             self.movedown = True
-        if ball.rect.centery < self.paddle.rect.centery:
+        if self.target_y < self.paddle.rect.centery:
             self.moveup = True
             self.movedown = False
-        
+
+
         self.move()

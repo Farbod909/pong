@@ -12,7 +12,7 @@ import sys
 from game import Game
 from colors import *
 from objects import *
-from player import PaddleMovement_Manual, PaddleMovement_AI
+from movement import PaddleMovement_Manual, PaddleMovement_AI
 from pygame.locals import *
 
 
@@ -27,7 +27,7 @@ def main():
     paddle2 = Paddle("left")
     player1_score = Player1Score()
     player2_score = Player2Score()
-    ball = Ball(speed=5)
+    ball = Ball(speed=5, maxspeed=15)
     
     # Add sprites to groups
     paddlesprites = pygame.sprite.RenderPlain((paddle1, paddle2))
@@ -43,7 +43,7 @@ def main():
 
     # Initialize objects to control paddle movement (manually or by AI)
     player1_movement = PaddleMovement_Manual(paddle1, K_UP, K_DOWN)
-    player2_movement = PaddleMovement_AI(paddle2)
+    player2_movement = PaddleMovement_AI(paddle2, "advanced")
 
     game.initial_frame()
 

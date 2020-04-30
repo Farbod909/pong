@@ -21,7 +21,7 @@ class Ball(pygame.sprite.Sprite):
     WIDTH = 16
     HEIGHT = 16
 
-    def __init__(self, speed):
+    def __init__(self, speed, maxspeed):
         pygame.sprite.Sprite.__init__(self)
         # self.image, self.rect = load_image('ball.png', -1)
         self.image = pygame.Surface((Ball.WIDTH, Ball.HEIGHT))
@@ -31,6 +31,7 @@ class Ball(pygame.sprite.Sprite):
         self.area = screen.get_rect()
         self.rect.center = self.area.center
         self.initial_speed = speed
+        self.maxspeed = maxspeed
         self.speed = speed
         self.angle = self._random_angle()
     
@@ -64,7 +65,7 @@ class Ball(pygame.sprite.Sprite):
 
         if not self.area.contains(newpos):
             if newpos.top <= 0 or newpos.bottom >= self.area.height:
-                self.angle = math.pi - self.angle
+                self.angle = -self.angle
             if newpos.left <= 0:
                 self.game.state.player1_scored()
                 self.reinit()
@@ -73,16 +74,17 @@ class Ball(pygame.sprite.Sprite):
                 self.reinit()
         else:
             for paddle in pygame.sprite.spritecollide(self, paddlesprites, False):
-                self.speed += 1
+                if self.speed < self.maxspeed:
+                    self.speed += 1
                 collision_location = (self.rect.centery - paddle.rect.top) / (paddle.rect.bottom - paddle.rect.top)
                 if paddle.side == "left":
-                    self.angle = (collision_location * -0.5 + 0.75) * math.pi
+                    self.angle = (collision_location * -0.5 + 0.25) * math.pi
                 if paddle.side == "right":
-                    self.angle = (collision_location * 0.5 + 1.25) * math.pi
+                    self.angle = (collision_location * 0.5 + 0.75) * math.pi
     
     def calcnewpos(self, rect, speed, angle):
         """Calculates the new position of the rect based on speed and angle."""
-        dx, dy = speed * math.sin(angle), speed * math.cos(angle)
+        dx, dy = speed * math.cos(angle), -(speed * math.sin(angle))
         return rect.move(dx, dy)
 
 class Paddle(pygame.sprite.Sprite):
