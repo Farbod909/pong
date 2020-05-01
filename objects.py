@@ -92,7 +92,6 @@ class Paddle(pygame.sprite.Sprite):
     
     Args:
         side (str): "left" or "right"
-        speed (int or float): Speed of the paddle
 
     Attributes:
         image (Surface): The Surface object that represents the paddle.
