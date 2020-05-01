@@ -35,7 +35,7 @@ def main():
     ballsprite = pygame.sprite.GroupSingle(ball)
 
     # Add groups (and the other groups they depend on) to the game
-    game.add_sprites({
+    game.add_spritegroups({
         'paddlesprites': paddlesprites,
         'scoresprites': scoresprites,
         'ballsprite': ballsprite
@@ -46,12 +46,12 @@ def main():
     player2_movement_manager = PaddleMovementManager_AI(paddle2, "advanced")
 
     # Add movement manager objects to game
-    game.add_movement_managers(
+    game.add_movement_managers([
         player1_movement_manager,
         player2_movement_manager
-    )
+    ])
 
-    game.start()
+    game.startloop()
 
 
 if __name__ == "__main__":

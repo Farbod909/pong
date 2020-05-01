@@ -18,6 +18,7 @@ class Game:
         spritegroups: A dictionary of all sprite groups in the game.
             The key is the name of the group and the value is a reference
             to the Group.
+        events (List[event]): pygame events from the current frame.
     """
     class State:
         """A representation of the state of the game.
@@ -42,9 +43,9 @@ class Game:
     
     def __init__(self, size, color):
         pygame.init()
-        self.state = self.State()
         self.screen = pygame.display.set_mode(size)
         pygame.display.set_caption("Pong")
+        self.state = Game.State()
         self.background = self.make_background(color)
         self.spritegroups = {}
         self.movement_managers = []
@@ -84,8 +85,19 @@ class Game:
         """
         sprite.game = self
         return sprite
+
+    def add_sprites(self, *sprites):
+        """Adds several sprites to the game.
+        
+        This adds a `game` property to each sprite in the game
+        so the sprite can access the game's functions and properties
+        such as the state.
+        """
+        for sprite in sprites:
+            self.add_sprite(sprite)
+
     
-    def add_sprites(self, spritegroups_dict):
+    def add_spritegroups(self, spritegroups_dict):
         """Adds references to Sprites and Game so they can access eachother.
 
         Creates a reference to this Game instance in all sprites and
@@ -93,17 +105,21 @@ class Game:
 
         Args:
             spritegroups_dict (Dict[str, Group]): A dictionary of the
-            spritegroups in the game where the key is the name of each
-            spritegroup and the value is a reference to the Group.
+                spritegroups in the game where the key is the name of each
+                spritegroup and the value is a reference to the Group.
         """
         self.spritegroups.update(spritegroups_dict)
-        for _, spritegroup in self.spritegroups.items():
+        for spritegroup in self.spritegroups.values():
             for sprite in spritegroup.sprites():
                 self.add_sprite(sprite)
     
-    def add_movement_managers(self, *args):
-        """Adds reference to movement managers in Game."""
-        self.movement_managers.extend(list(args))
+    def add_movement_managers(self, movement_managers):
+        """Adds reference to movement managers in Game.
+        
+        Args:
+            movement_managers (List[PaddleMovementManager])
+        """
+        self.movement_managers.extend(movement_managers)
 
     def update_movement_managers(self):
         """Update all movement managers."""
@@ -121,20 +137,20 @@ class Game:
         Blits the background onto all sprites in the game and then
         blits the sprites with new locations onto the screen again.
         """
-        for spritegroup_name, spritegroup in self.spritegroups.items():
+        for spritegroup in self.spritegroups.values():
             for sprite in spritegroup.sprites():
                 self.screen.blit(self.background, sprite.rect, sprite.rect)
             spritegroup.update()
             spritegroup.draw(self.screen)
         pygame.display.update()
     
-    def start(self):
+    def startloop(self):
         self.initial_frame()
         clock = pygame.time.Clock()
         while True:
             clock.tick(60)
 
-            # Store events in a list to be passed to player-controlled sprites
+            # Store events in a list to be available to player-controlled sprites
             self.events = []
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -143,10 +159,8 @@ class Game:
                     self.events.append(event)
 
             # Update paddle movement direction based on keyboard events (manual)
-            # or ball location (AI)
+            # or the state of other game sprites (AI)
             self.update_movement_managers()
-            # player1_movement.update()
-            # player2_movement.update()
 
             # Clear sprites from screen and re-render them based on new values
             self.update_frame()
