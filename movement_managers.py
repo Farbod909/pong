@@ -4,7 +4,7 @@ import random
 from abc import ABC, abstractmethod
 from pygame.locals import *
 
-class PaddleMovement(ABC):
+class PaddleMovementManager(ABC):
     """Abstract Base Class of all PaddleMovement types."""
     def __init__(self, paddle):
         self.paddle = paddle
@@ -32,7 +32,7 @@ class PaddleMovement(ABC):
             self.paddle.stop()
 
 
-class PaddleMovement_Manual(PaddleMovement):
+class PaddleMovementManager_Manual(PaddleMovementManager):
     """Controls paddle movement based on user input.
     
     Args:
@@ -45,13 +45,9 @@ class PaddleMovement_Manual(PaddleMovement):
         self.moveup_key = moveup_key
         self.movedown_key = movedown_key
 
-    def update(self, events):
-        """Determines and sets the movement direction of a paddle based on event queue.
-        
-        Args:
-            events (List[pygame.event]): The event queue in a given frame
-        """
-        for event in events:
+    def update(self):
+        """Determines and sets the movement direction of a paddle based on event queue."""
+        for event in self.paddle.game.events:
             if event.type == KEYDOWN:
                 if event.key == self.moveup_key:
                     self.moveup = True
@@ -66,7 +62,7 @@ class PaddleMovement_Manual(PaddleMovement):
         self.move()
 
 
-class PaddleMovement_AI(PaddleMovement):
+class PaddleMovementManager_AI(PaddleMovementManager):
     """Controls paddle movement based on heuristics
     
     Args:
@@ -90,26 +86,21 @@ class PaddleMovement_AI(PaddleMovement):
         elif type == "advanced":
             self.set_target_y = self.advanced_target_y
 
-    def basic_target_y(self, ball):
-        """Paddle follows the ball.
-        
-        Args:
-            ball (Sprite)
-        """
+    def basic_target_y(self):
+        """Paddle follows the ball."""
+        ball = self.paddle.game.spritegroups['ballsprite'].sprite
         self.target_y = ball.rect.centery
 
-    def advanced_target_y(self, ball):
+    def advanced_target_y(self):
         """Determine the final location of the ball depending on angle and distance from paddle.
         
         This method also adds a randomized offset to the target_y (limited to
         the height of the paddle) in order to add some variance to the angle at
         which it launches the ball (otherwise it would always launch ball at an
-        angle of 0 or π)
-
-        Args:
-            ball (Sprite)
+        angle of 0 or π).
         """
         screen_height = pygame.display.get_surface().get_height()
+        ball = self.paddle.game.spritegroups['ballsprite'].sprite
 
         angle = ball.angle
         if angle < 0:
@@ -147,13 +138,9 @@ class PaddleMovement_AI(PaddleMovement):
                 self.target_y = screen_height / 2
                 self.offset = 0
 
-    def update(self, ball):
-        """Sets the movement direction of a paddle based on target_y.
-        
-        Args:
-            ball (Sprite)
-        """
-        self.set_target_y(ball)
+    def update(self):
+        """Sets the movement direction of a paddle based on target_y."""
+        self.set_target_y()
 
         if self.target_y > self.paddle.rect.centery:
             self.moveup = False
@@ -161,6 +148,5 @@ class PaddleMovement_AI(PaddleMovement):
         if self.target_y < self.paddle.rect.centery:
             self.moveup = True
             self.movedown = False
-
-
+            
         self.move()

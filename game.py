@@ -1,18 +1,23 @@
 import pygame
+import sys
 from colors import *
-from typing import Dict, List, Optional
+from pygame.locals import *
 
 
 class Game:
     """A class that encapsulates all game data and generic functions.
+
+    Args:
+        size ((int, int))
+        color: (Color or (int, int, int))
     
     Attributes:
         state (State): The current state of the game.
         screen (Surface): The display surface.
         background (Surface): The background surface.
-        spritegroups_with_dependencies: A dictionary of all sprite groups
-            in the game mapped to a list of all other spritegroups that each
-            one is dependent on (or None if that spritegroup has no dependencies).
+        spritegroups: A dictionary of all sprite groups in the game.
+            The key is the name of the group and the value is a reference
+            to the Group.
     """
     class State:
         """A representation of the state of the game.
@@ -41,7 +46,8 @@ class Game:
         self.screen = pygame.display.set_mode(size)
         pygame.display.set_caption("Pong")
         self.background = self.make_background(color)
-        self.spritegroups_with_dependencies: Dict[pygame.sprite.Group, Optional[List[pygame.sprite.Group]]] = {}
+        self.spritegroups = {}
+        self.movement_managers = []
 
     def make_background(self, color):
         """Create a background surface.
@@ -79,17 +85,30 @@ class Game:
         sprite.game = self
         return sprite
     
-    def add_sprites(self, spritegroups_with_dependencies: Dict[pygame.sprite.Group, Optional[List[pygame.sprite.Group]]]):
-        """Associates sprite with this Game instance.
+    def add_sprites(self, spritegroups_dict):
+        """Adds references to Sprites and Game so they can access eachother.
 
         Creates a reference to this Game instance in all sprites and
-        creates a reference to all spritegroups and their dependencies
-        in this Game instance.
+        creates a reference to all spritegroups in this Game instance.
+
+        Args:
+            spritegroups_dict (Dict[str, Group]): A dictionary of the
+            spritegroups in the game where the key is the name of each
+            spritegroup and the value is a reference to the Group.
         """
-        for spritegroup, dependencies in spritegroups_with_dependencies.items():
-            self.spritegroups_with_dependencies[spritegroup] = dependencies
+        self.spritegroups.update(spritegroups_dict)
+        for _, spritegroup in self.spritegroups.items():
             for sprite in spritegroup.sprites():
                 self.add_sprite(sprite)
+    
+    def add_movement_managers(self, *args):
+        """Adds reference to movement managers in Game."""
+        self.movement_managers.extend(list(args))
+
+    def update_movement_managers(self):
+        """Update all movement managers."""
+        for movement_manager in self.movement_managers:
+            movement_manager.update()
 
     def initial_frame(self):
         """Blit initial frame onto display surface."""
@@ -102,13 +121,35 @@ class Game:
         Blits the background onto all sprites in the game and then
         blits the sprites with new locations onto the screen again.
         """
-        for spritegroup, dependencies in self.spritegroups_with_dependencies.items():
+        for spritegroup_name, spritegroup in self.spritegroups.items():
             for sprite in spritegroup.sprites():
                 self.screen.blit(self.background, sprite.rect, sprite.rect)
-            if dependencies is not None:
-                spritegroup.update(*dependencies)
-            else:
-                spritegroup.update()
+            spritegroup.update()
             spritegroup.draw(self.screen)
         pygame.display.update()
+    
+    def start(self):
+        self.initial_frame()
+        clock = pygame.time.Clock()
+        while True:
+            clock.tick(60)
+
+            # Store events in a list to be passed to player-controlled sprites
+            self.events = []
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    sys.exit()
+                else:
+                    self.events.append(event)
+
+            # Update paddle movement direction based on keyboard events (manual)
+            # or ball location (AI)
+            self.update_movement_managers()
+            # player1_movement.update()
+            # player2_movement.update()
+
+            # Clear sprites from screen and re-render them based on new values
+            self.update_frame()
+
+
 

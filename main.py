@@ -12,7 +12,7 @@ import sys
 from game import Game
 from colors import *
 from objects import *
-from movement import PaddleMovement_Manual, PaddleMovement_AI
+from movement_managers import *
 from pygame.locals import *
 
 
@@ -36,36 +36,22 @@ def main():
 
     # Add groups (and the other groups they depend on) to the game
     game.add_sprites({
-        paddlesprites: None,
-        scoresprites: None,
-        ballsprite: [paddlesprites]
+        'paddlesprites': paddlesprites,
+        'scoresprites': scoresprites,
+        'ballsprite': ballsprite
     })
 
     # Initialize objects to control paddle movement (manually or by AI)
-    player1_movement = PaddleMovement_Manual(paddle1, K_UP, K_DOWN)
-    player2_movement = PaddleMovement_AI(paddle2, "advanced")
+    player1_movement_manager = PaddleMovementManager_Manual(paddle1, K_UP, K_DOWN)
+    player2_movement_manager = PaddleMovementManager_AI(paddle2, "advanced")
 
-    game.initial_frame()
+    # Add movement manager objects to game
+    game.add_movement_managers(
+        player1_movement_manager,
+        player2_movement_manager
+    )
 
-    clock = pygame.time.Clock()
-    while True:
-        clock.tick(60)
-
-        # Store events in a list to be passed to player-controlled sprites
-        events = []
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                sys.exit()
-            else:
-                events.append(event)
-
-        # Update paddle movement direction based on keyboard events (manual)
-        # or ball location (AI)
-        player1_movement.update(events)
-        player2_movement.update(ball)
-
-        # Clear sprites from screen and re-render them based on new values
-        game.update_frame()
+    game.start()
 
 
 if __name__ == "__main__":

@@ -53,7 +53,7 @@ class Ball(pygame.sprite.Sprite):
         self.rect.center = self.area.center
         self.speed = self.initial_speed
 
-    def update(self, paddlesprites):
+    def update(self):
         """Move the ball based on its current angle and speed.
         
         Changes angle of the ball based on what part of the paddle it
@@ -73,7 +73,7 @@ class Ball(pygame.sprite.Sprite):
                 self.game.state.player2_scored()
                 self.reinit()
         else:
-            for paddle in pygame.sprite.spritecollide(self, paddlesprites, False):
+            for paddle in pygame.sprite.spritecollide(self, self.game.spritegroups["paddlesprites"], False):
                 if self.speed < self.maxspeed:
                     self.speed += 1
                 collision_location = (self.rect.centery - paddle.rect.top) / (paddle.rect.bottom - paddle.rect.top)
