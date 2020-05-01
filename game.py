@@ -20,6 +20,7 @@ class Game:
             to the Group.
         events (List[event]): pygame events from the current frame.
     """
+
     class State:
         """A representation of the state of the game.
         
@@ -27,20 +28,21 @@ class Game:
             player1_score (int)
             player2_score (int)
         """
+
         def __init__(self):
             self.player1_score = 0
             self.player2_score = 0
-        
+
         def player1_scored(self):
             self.player1_score += 1
-    
+
         def player2_scored(self):
             self.player2_score += 1
-        
+
         def reset_scores(self):
             self.player1_score = 0
             self.player2_score = 0
-    
+
     def __init__(self, size, color):
         pygame.init()
         self.screen = pygame.display.set_mode(size)
@@ -67,7 +69,8 @@ class Game:
             background,
             (250, 250, 250),
             background.get_rect().midtop,
-            background.get_rect().midbottom)
+            background.get_rect().midbottom,
+        )
         return background
 
     def add_sprite(self, sprite):
@@ -96,7 +99,6 @@ class Game:
         for sprite in sprites:
             self.add_sprite(sprite)
 
-    
     def add_spritegroups(self, spritegroups_dict):
         """Adds references to Sprites and Game so they can access eachother.
 
@@ -112,7 +114,7 @@ class Game:
         for spritegroup in self.spritegroups.values():
             for sprite in spritegroup.sprites():
                 self.add_sprite(sprite)
-    
+
     def add_movement_managers(self, movement_managers):
         """Adds reference to movement managers in Game.
         
@@ -143,7 +145,7 @@ class Game:
             spritegroup.update()
             spritegroup.draw(self.screen)
         pygame.display.update()
-    
+
     def startloop(self):
         self.initial_frame()
         clock = pygame.time.Clock()
@@ -164,6 +166,3 @@ class Game:
 
             # Clear sprites from screen and re-render them based on new values
             self.update_frame()
-
-
-

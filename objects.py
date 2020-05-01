@@ -4,6 +4,7 @@ import random
 from colors import *
 from pygame.locals import *
 
+
 class Ball(pygame.sprite.Sprite):
     """A ball that will move across the screen.
 
@@ -18,6 +19,7 @@ class Ball(pygame.sprite.Sprite):
         speed (int or float): The current speed of the ball.
         angle (float): The angle at which the ball is moving, in radians.
     """
+
     WIDTH = 16
     HEIGHT = 16
 
@@ -26,7 +28,7 @@ class Ball(pygame.sprite.Sprite):
         # self.image, self.rect = load_image('ball.png', -1)
         self.image = pygame.Surface((Ball.WIDTH, Ball.HEIGHT))
         self.rect = self.image.get_rect()
-        pygame.draw.circle(self.image, WHITE, self.rect.center, Ball.WIDTH/2)
+        pygame.draw.circle(self.image, WHITE, self.rect.center, Ball.WIDTH / 2)
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
         self.rect.center = self.area.center
@@ -34,7 +36,7 @@ class Ball(pygame.sprite.Sprite):
         self.maxspeed = maxspeed
         self.speed = speed
         self.angle = self._random_angle()
-    
+
     def _random_angle(self):
         """Return a random angle (in radians) between 0.15π and 0.3π
 
@@ -73,19 +75,24 @@ class Ball(pygame.sprite.Sprite):
                 self.game.state.player2_scored()
                 self.reinit()
         else:
-            for paddle in pygame.sprite.spritecollide(self, self.game.spritegroups["paddlesprites"], False):
+            for paddle in pygame.sprite.spritecollide(
+                self, self.game.spritegroups["paddlesprites"], False
+            ):
                 if self.speed < self.maxspeed:
                     self.speed += 1
-                collision_location = (self.rect.centery - paddle.rect.top) / (paddle.rect.bottom - paddle.rect.top)
+                collision_location = (self.rect.centery - paddle.rect.top) / (
+                    paddle.rect.bottom - paddle.rect.top
+                )
                 if paddle.side == "left":
                     self.angle = (collision_location * -0.5 + 0.25) * math.pi
                 if paddle.side == "right":
                     self.angle = (collision_location * 0.5 + 0.75) * math.pi
-    
+
     def calcnewpos(self, rect, speed, angle):
         """Calculates the new position of the rect based on speed and angle."""
         dx, dy = speed * math.cos(angle), -(speed * math.sin(angle))
         return rect.move(dx, dy)
+
 
 class Paddle(pygame.sprite.Sprite):
     """A user controlled paddle that moves up and down to hit the ball
@@ -103,6 +110,7 @@ class Paddle(pygame.sprite.Sprite):
         movepos([int or float, int or float]): How much to move in each direction
             each frame
     """
+
     WIDTH = 16
     HEIGHT = 100
 
@@ -126,7 +134,7 @@ class Paddle(pygame.sprite.Sprite):
             self.rect.midleft = self.area.midleft
         if self.side == "right":
             self.rect.midright = self.area.midright
-    
+
     def update(self):
         """Move paddles based on current state and speed."""
         newpos = self.rect.move(self.movepos)
@@ -148,6 +156,7 @@ class Paddle(pygame.sprite.Sprite):
         self.movepos = [0, 0]
         self.state = "still"
 
+
 class Player1Score(pygame.sprite.Sprite):
     """A sprite that shows player 1's score
     
@@ -156,6 +165,7 @@ class Player1Score(pygame.sprite.Sprite):
         image (Surface): The Surface object that represents the score sprite.
         rect (Rect): The position and size of the score sprite.
     """
+
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.font = pygame.font.Font(None, 48)
@@ -171,6 +181,7 @@ class Player1Score(pygame.sprite.Sprite):
         self.rect.top = 10
         self.rect.left = pygame.display.get_surface().get_rect().centerx + 10
 
+
 class Player2Score(pygame.sprite.Sprite):
     """A sprite that shows player 2's score
         
@@ -179,6 +190,7 @@ class Player2Score(pygame.sprite.Sprite):
         image (Surface): The Surface object that represents the score sprite.
         rect (Rect): The position and size of the score sprite.
     """
+
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.font = pygame.font.Font(None, 48)
