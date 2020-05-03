@@ -17,7 +17,7 @@ class PaddleMovementManager(ABC):
     def update(self):
         pass
 
-    def move(self):
+    def move(self, custom_amount=None):
         """Sets movemement direction of paddle.
         
         After is determined what direction the paddle should move,
@@ -27,9 +27,9 @@ class PaddleMovementManager(ABC):
         if self.moveup and self.movedown:
             self.paddle.stop()
         elif self.moveup:
-            self.paddle.moveup()
+            self.paddle.moveup(custom_amount)
         elif self.movedown:
-            self.paddle.movedown()
+            self.paddle.movedown(custom_amount)
         else:
             self.paddle.stop()
 
@@ -152,6 +152,7 @@ class PaddleMovementManager_AI(PaddleMovementManager):
         """Sets the movement direction of a paddle based on target_y."""
         self.set_target_y()
 
+        distance = abs(self.target_y - self.paddle.rect.centery)
         if self.target_y > self.paddle.rect.centery:
             self.moveup = False
             self.movedown = True
@@ -159,4 +160,4 @@ class PaddleMovementManager_AI(PaddleMovementManager):
             self.moveup = True
             self.movedown = False
 
-        self.move()
+        self.move(distance)

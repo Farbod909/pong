@@ -61,8 +61,7 @@ class Game:
         Return:
             Surface: The background.
         """
-        screen = pygame.display.get_surface()
-        background = pygame.Surface((screen.get_width(), screen.get_height()))
+        background = pygame.Surface((self.screen.get_width(), self.screen.get_height()))
         background = background.convert()
         background.fill(color)
         pygame.draw.line(
@@ -156,6 +155,10 @@ class Game:
             self.events = []
             for event in pygame.event.get():
                 if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == KEYDOWN and event.key == K_ESCAPE:
+                    pygame.quit()
                     sys.exit()
                 else:
                     self.events.append(event)

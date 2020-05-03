@@ -141,20 +141,23 @@ class Paddle(pygame.sprite.Sprite):
         if self.area.contains(newpos):
             self.rect = newpos
 
-    def moveup(self):
+    def moveup(self, custom_amount=None):
         """Make paddle start moving up."""
-        self.movepos[1] = -self.speed
-        self.state = "moveup"
+        if custom_amount is not None and custom_amount < self.speed:
+            self.movepos[1] = -custom_amount
+        else:
+            self.movepos[1] = -self.speed
 
-    def movedown(self):
+    def movedown(self, custom_amount=None):
         """Make paddle start moving down."""
-        self.movepos[1] = self.speed
-        self.state = "movedown"
+        if custom_amount is not None and custom_amount < self.speed:
+            self.movepos[1] = custom_amount
+        else:
+            self.movepos[1] = self.speed
 
     def stop(self):
         """Stop paddle movement."""
         self.movepos = [0, 0]
-        self.state = "still"
 
 
 class Player1Score(pygame.sprite.Sprite):

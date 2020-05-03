@@ -45,7 +45,7 @@ def main():
     )
 
     # Initialize objects to control paddle movement (manually or by AI)
-    player1_movement_manager = PaddleMovementManager_Manual(paddle1, K_UP, K_DOWN)
+    player1_movement_manager = PaddleMovementManager_AI(paddle1, "basic")
     player2_movement_manager = PaddleMovementManager_AI(paddle2, "advanced")
 
     # Add movement manager objects to game
